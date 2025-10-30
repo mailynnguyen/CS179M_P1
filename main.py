@@ -141,11 +141,8 @@ def main():
         solution = copy.deepcopy(shortest_solution) # copy the shortest solutiont to use
 
         # randomizes two nodes that are close together
-        node1 = random.randint(1, num_nodes) # get a randon first node, doesn't choose the starting node
-        if node1 < num_nodes - 3:
-            node2 = node1 + 3
-        else:
-            node2 = node1 - random.randint(1, 3)
+        node1 = random.randint(1, num_nodes - 3) # get a randon first node, doesn't choose the starting node
+        node2 = node1 + random.randint(1, 3)
         
         # randomizes randonmly distanced nodes
         # node1 = random.randint(1, num_nodes)
