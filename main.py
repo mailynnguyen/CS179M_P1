@@ -84,7 +84,8 @@ def create_solution_visual(output_file_name):
 
     plt.figure()
     plt.plot(x, y, 'o-')
-
+    plt.axis("equal")
+    
     plt.show()
 
 
