@@ -4,7 +4,8 @@ from numpy import random
 import numpy as np
 import msvcrt
 import matplotlib.pyplot as plt
-    
+import time
+
 
 def euclidean_distance(c1, c2):
     return math.sqrt((c1[0] - c2[0])**2 + (c1[1] - c2[1])**2)
@@ -47,7 +48,7 @@ def calc_nearest_neighbor(distance_matrix, num_nodes):
 
     # print(total_distance)
 
-    return visited, total_distance
+    return visited, round(total_distance, 1)
 
 
 def calc_nearest_neighbor_with_solution(distance_matrix, curr_solution, shortest_distance):
@@ -85,7 +86,7 @@ def create_solution_visual(output_file_name):
     plt.figure()
     plt.plot(x, y, 'o-')
     plt.axis("equal")
-    
+
     plt.show()
 
 
@@ -100,66 +101,68 @@ def main():
     print(f"There are {num_nodes} nodes, computing route..")
     print("\tShortest Route Discovered So Far")
 
+    start_time = time.time() # tracks the start time
+
     distance_matrix, coordinates = create_distance_matrix(input_file, num_nodes) # creates a distance matrix that holds the distance between node x and y at distance_matrix[x][y]
 
     # RANDOM SEARCH
-    # shortest_distance = float('inf')
+    shortest_distance = float('inf')
 
-    # for _ in range(1000000):
-    #     og_arr = np.array((range(1, num_nodes + 1)))
-    #     random.shuffle(og_arr[1:])
-    #     new_arr = np.append(og_arr, 1)
+    while True: # loops through infinitely (anytime algorithm)
+
+        if time.time() - start_time >= 10: # checks if the elapsed time is over designated time
+            break
+
+        # if msvcrt.kbhit(): # checks if key has been hit
+        #     key = msvcrt.getwche() # gets the char pressed
+        #     if key == '\r': # '\r' represents the 'Enter' key
+        #         break
+
+        og_arr = np.array((range(1, num_nodes + 1))) # create an array of the nodes in order
+        random.shuffle(og_arr[1:]) # shuffle the array without the original start node
+        new_arr = np.append(og_arr, 1) # make a new array with the shuffled array and add 1 at the end
 
         
-    #     total_distance = 0
-    #     curr_point = new_arr[0]
-    #     for next_point in new_arr:
-    #         total_distance += distance_matrix[curr_point - 1][next_point - 1]
-    #         if total_distance > shortest_distance:
-    #             break
-    #         curr_point = next_point
-    #     # print(total_distance)
+        total_distance = 0 # variable to keep track of total solution distance
+        curr_point = new_arr[0] # make the starting point the first node of the array
+        for next_point in new_arr: # loop through the array
+            total_distance += distance_matrix[curr_point - 1][next_point - 1] # find the distance using the distance matrix of the next node to the curr node
+            if total_distance > shortest_distance: # early abandoning
+                break
+            curr_point = next_point # move the nodes, make the curr node be the next node, next node will move to the next due to the for loop
+        # print(total_distance)
 
-    #     if total_distance < shortest_distance:
-    #         shortest_distance = total_distance
-    #         print(shortest_distance)
+        if total_distance < shortest_distance: # check if the total distance is less than the shortest distance
+            shortest_distance = round(total_distance, 1) # if so, make that the new shortest distance
+            shortest_solution = new_arr
+            print(shortest_distance) # and print
 
-    # i = 0
-    # for row in distance_matrix:
-    #     print(f"{i}: {row}")
-    #     i += 1
 
     # NEAREST NEIGHBOR
-    shortest_solution, shortest_distance = calc_nearest_neighbor(distance_matrix, num_nodes)
-    print(f"\t\t{shortest_distance}")
+    # shortest_solution, shortest_distance = calc_nearest_neighbor(distance_matrix, num_nodes)
+    # print(f"\t\t{shortest_distance}")
 
-    while True:
-        if msvcrt.kbhit(): # checks if key has been hit
-            key = msvcrt.getwche() # gets the char pressed
-            if key == '\r': # '\r' represents the 'Enter' key
-                break
+    # while True:
+    #     if msvcrt.kbhit(): # checks if key has been hit
+    #         key = msvcrt.getwche() # gets the char pressed
+    #         if key == '\r': # '\r' represents the 'Enter' key
+    #             break
 
-        solution = copy.deepcopy(shortest_solution) # copy the shortest solutiont to use
+    #     solution = copy.deepcopy(shortest_solution) # copy the shortest solutiont to use
 
-        # randomizes two nodes that are close together
-        node1 = random.randint(1, num_nodes - 3) # get a randon first node, doesn't choose the starting node
-        node2 = node1 + random.randint(1, 3)
-        
-        # randomizes randonmly distanced nodes
-        # node1 = random.randint(1, num_nodes)
-        # node2 = random.randint(1, num_nodes)
-        # while node2 == node1:
-        #     node2 = random.randint(1, num_nodes)
+    #     # randomizes two nodes that are close together
+    #     node1 = random.randint(1, num_nodes - 3) # get a randon first node, doesn't choose the starting node
+    #     node2 = node1 + random.randint(1, 3)
 
 
-        solution[node1], solution[node2] = solution[node2], solution[node1] # swap the two nodes
+    #     solution[node1], solution[node2] = solution[node2], solution[node1] # swap the two nodes
 
-        total_distance = calc_nearest_neighbor_with_solution(distance_matrix, solution, shortest_distance) # calcs the nearest neighbor with the swapped solution and returns the total distance
+    #     total_distance = calc_nearest_neighbor_with_solution(distance_matrix, solution, shortest_distance) # calcs the nearest neighbor with the swapped solution and returns the total distance
 
-        if total_distance < shortest_distance:
-            shortest_distance = total_distance
-            shortest_solution = solution
-            print(f"\t\t{shortest_distance}")
+    #     if total_distance < shortest_distance:
+    #         shortest_distance = round(total_distance, 1)
+    #         shortest_solution = solution
+    #         print(f"\t\t{shortest_distance}")
 
     output_file_name = write_to_text_file(input_file, shortest_solution, coordinates)
 
